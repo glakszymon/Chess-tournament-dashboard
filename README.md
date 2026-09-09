@@ -42,21 +42,6 @@ node server.js
 
 Po uruchomieniu zobaczysz w terminalu:
 
-```
-╔══════════════════════════════════════════════╗
-║   ♟  Chess Tournament Server  ♟              ║
-╠══════════════════════════════════════════════╣
-║  Manager:  http://localhost:3000              ║
-║  TV View:  http://192.168.1.42:3000/tv        ║
-╚══════════════════════════════════════════════╝
-```
-
-### Otwórz w przeglądarkach
-
-| Cel | URL | Urządzenie |
-|-----|-----|------------|
-| **Manager** (wpisywanie wyników) | `http://localhost:3000` | Laptop organizatora |
-| **Widok TV** (tabela + animacje) | `http://<IP_LAN>:3000/tv` | TV / projektor / tablet |
 
 > Wszystkie urządzenia muszą być w tej samej sieci WiFi/LAN.
 
