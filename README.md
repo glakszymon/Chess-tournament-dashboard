@@ -33,7 +33,7 @@ Zero zależności. Zero bundlerów. Czysty Node.js + HTML/CSS/JS.
 
 ```bash
 # 1. Sklonuj repozytorium
-git clone [https://github.com/TWOJ_NICK/chess-tournament-dashboard.git](https://github.com/glakszymon/Chess-tournament-dashboard.git)
+git clone https://github.com/glakszymon/Chess-tournament-dashboard.git
 cd chess-tournament-dashboard
 
 # 2. Uruchom serwer
