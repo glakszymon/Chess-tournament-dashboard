@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- [FIX-18] Dynamiczny meta theme-color dla paska mobilnych przeglądarek -->
+<meta name="theme-color" id="meta-theme" content="#1c1917">
+<title>Chess Tournament — Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root">
+
+<!-- ── SERVER STATUS BANNER ── -->
+<div id="server-banner" class="server-banner" style="display:none">
+  ⚠️ Brak połączenia z serwerem lokalnym.
+  Uruchom <code style="background:rgba(0,0,0,.1);padding:1px 6px;border-radius:4px">node server.js</code>
+  w katalogu projektu, potem
+  <button onclick="location.reload()">Odśwież</button>
+</div>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="top-logo">
+    <div class="top-logo-mark">♟</div>
+    <em>Chess</em>&thinsp;Tournament
+  </div>
+  <div class="top-sep"></div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <div class="conn-dot" id="conn-dot"></div>
+    <span class="conn-label" id="conn-label">Łączenie…</span>
+  </div>
+  <span class="top-tname" id="hdr-name"></span>
+  <a class="top-btn top-btn-accent" id="tv-link" href="/tv.html" target="_blank">📺 Otwórz TV</a>
+</header>
+
+<!-- ── PROGRESS RAIL ── -->
+<nav class="rail-wrap" id="rail">
+  <div class="rail-step active" data-s="1" onclick="railClick(1)"><div class="rail-dot"><span>1</span></div><div class="rail-label">Turniej</div></div>
+  <div class="rail-step"        data-s="2" onclick="railClick(2)"><div class="rail-dot"><span>2</span></div><div class="rail-label">Format</div></div>
+  <div class="rail-step"        data-s="3" onclick="railClick(3)"><div class="rail-dot"><span>3</span></div><div class="rail-label">Gracze</div></div>
+  <div class="rail-step"        data-s="4" onclick="railClick(4)"><div class="rail-dot"><span>4</span></div><div class="rail-label">Rozgrywki</div></div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     PANELS
+══════════════════════════════════════════════════════ -->
+<div class="panels">
+
+<!-- PANEL 1 — Tournament info -->
+<div class="panel active" id="p1">
+  <div class="hero">
+    <div class="hero-step"><div class="hero-step-line"></div>Krok 1 z 3</div>
+    <h1 class="hero-title">Witaj w Chess Tournament&thinsp;♟</h1>
+    <p class="hero-sub">Przeprowadzimy Cię krok po kroku. Zacznij od podstawowych danych.</p>
+  </div>
+  <div class="card">
+    <div class="card-eyebrow">Dane turnieju</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nazwa turnieju ✦</label><input class="form-input" id="t-name" placeholder="np. Mistrzostwa Piwnicy 2025" onkeydown="if(event.key==='Enter')goPanel(2)"></div>
+      <div class="form-group"><label class="form-label">Organizator</label><input class="form-input" id="t-org" placeholder="Twoje imię"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="t-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Miejsce</label><input class="form-input" id="t-loc" placeholder="np. Dom Bartka 🏠"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-eyebrow">Kolor przewodni</div>
+    <!-- [FIX-12] Swatche z tytułami — użytkownik wie co wybiera -->
+    <div class="swatches" id="sw-theme">
+      <div class="swatch sel" style="background:#1c1917" data-c="#1c1917" onclick="pickTheme(this)" title="Antracyt"></div>
+      <div class="swatch" style="background:#1d4ed8" data-c="#1d4ed8" onclick="pickTheme(this)" title="Granatowy"></div>
+      <div class="swatch" style="background:#7c3aed" data-c="#7c3aed" onclick="pickTheme(this)" title="Fioletowy"></div>
+      <div class="swatch" style="background:#0e7490" data-c="#0e7490" onclick="pickTheme(this)" title="Turkusowy"></div>
+      <div class="swatch" style="background:#15803d" data-c="#15803d" onclick="pickTheme(this)" title="Zielony"></div>
+      <div class="swatch" style="background:#b45309" data-c="#b45309" onclick="pickTheme(this)" title="Bursztynowy"></div>
+      <div class="swatch" style="background:#be123c" data-c="#be123c" onclick="pickTheme(this)" title="Czerwony"></div>
+    </div>
+    <p class="text-sm text-muted mt12">Kolor pojawi się w tabeli i widoku TV.</p>
+  </div>
+  <div class="panel-nav"><span></span><button class="btn btn-primary" onclick="goPanel(2)">Dalej — Format →</button></div>
+</div>
+
+<!-- PANEL 2 — Format -->
+<div class="panel" id="p2">
+  <div class="hero">
+    <div class="hero-step"><div class="hero-step-line"></div>Krok 2 z 3</div>
+    <h1 class="hero-title">Jak chcecie grać?</h1>
+    <p class="hero-sub">Wybierz system rozgrywek — każdy inaczej wyłania mistrza.</p>
+  </div>
+  <div class="card mb16">
+    <div class="card-eyebrow">System rozgrywek</div>
+    <div class="fmt-grid">
+      <div class="fmt-card sel" data-fmt="league" onclick="pickFmt(this)">
+        <div class="fmt-sel-mark">✓</div><div class="fmt-icon-bg">📋</div>
+        <div class="fmt-name">Liga</div><div class="fmt-desc">Każdy z każdym. Punkty sumują się przez cały turniej.</div>
+      </div>
+      <div class="fmt-card" data-fmt="cup" onclick="pickFmt(this)">
+        <div class="fmt-sel-mark">✓</div><div class="fmt-icon-bg">🏆</div>
+        <div class="fmt-name">Puchar</div><div class="fmt-desc">Jedna przegrana i odpadasz. Dramatyczne do końca!</div>
+      </div>
+      <div class="fmt-card" data-fmt="swiss" onclick="pickFmt(this)">
+        <div class="fmt-sel-mark">✓</div><div class="fmt-icon-bg">🎯</div>
+        <div class="fmt-name">Szwajcarski</div><div class="fmt-desc">Grasz z kimś równym poziomem. Nikt nie wypada.</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="fopt-league">
+    <div class="card-eyebrow">Opcje ligi</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mecze rewanżowe</label><select class="form-select" id="opt-rematch"><option value="no">Nie — jeden mecz</option><option value="yes">Tak — dwumecze</option></select></div>
+      <div class="form-group"><label class="form-label">Kolejność par</label><select class="form-select" id="opt-order"><option value="rr">Round-Robin</option><option value="rand">Losowe</option></select></div>
+    </div>
+  </div>
+  <div class="card" id="fopt-cup" style="display:none">
+    <div class="card-eyebrow">Opcje pucharu</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mecz o 3. miejsce</label><select class="form-select" id="opt-3rd"><option value="yes">Tak</option><option value="no">Nie</option></select></div>
+      <div class="form-group"><label class="form-label">Rozstawienie</label><select class="form-select" id="opt-seed"><option value="seed">Wg seedów</option><option value="random">Losowe</option></select></div>
+    </div>
+  </div>
+  <div class="card" id="fopt-swiss" style="display:none">
+    <div class="card-eyebrow">Opcje szwajcarskiego</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Liczba rund</label><input class="form-input" id="opt-sw-rounds" type="number" value="5" min="3" max="14"></div>
+      <div class="form-group"><label class="form-label">Parowanie</label><select class="form-select" id="opt-sw-pair"><option value="points">Wg bieżących punktów</option><option value="rand">Losowe</option></select></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-eyebrow">Punktacja</div>
+    <div class="pills" id="score-pills">
+      <button class="pill sel" onclick="pickScore('chess',this)">Szachowy 1 / ½ / 0</button>
+      <button class="pill" onclick="pickScore('sport',this)">Sportowy 3 / 1 / 0</button>
+      <button class="pill" onclick="pickScore('custom',this)">Własny…</button>
+    </div>
+    <div class="form-row3">
+      <div class="form-group"><label class="form-label">Wygrana</label><input class="form-input" id="pts-w" type="number" value="1" min="0" step="0.5"></div>
+      <div class="form-group"><label class="form-label">Remis</label><input class="form-input" id="pts-d" type="number" value="0.5" min="0" step="0.5"></div>
+      <div class="form-group"><label class="form-label">Przegrana</label><input class="form-input" id="pts-l" type="number" value="0" min="0" step="0.5"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Rozstrzyganie remisów</label>
+      <select class="form-select" id="opt-tie">
+        <option value="direct">Bezpośredni wynik</option>
+        <option value="wins">Liczba wygranych</option>
+        <option value="gd">Różnica bramek/punktów</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dogrywka przy remisie</label>
+      <label class="toggle-row">
+        <input type="checkbox" id="opt-overtime" class="toggle-input">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">Przy remisie gramy dogrywkę</span>
+      </label>
+    </div>
+  </div>
+  <div class="panel-nav">
+    <button class="btn btn-ghost" onclick="goPanel(1,true)">← Wstecz</button>
+    <button class="btn btn-primary" onclick="goPanel(3)">Dalej — Gracze →</button>
+  </div>
+</div>
+
+<!-- PANEL 3 — Players -->
+<div class="panel" id="p3">
+  <div class="hero">
+    <div class="hero-step"><div class="hero-step-line"></div>Krok 3 z 3</div>
+    <h1 class="hero-title">Kto gra?</h1>
+    <p class="hero-sub">Dodaj uczestników. W Lidze i Szwajcarskim możesz dołączyć gracza w trakcie.</p>
+  </div>
+  <div class="card">
+    <div class="card-eyebrow">Dodaj uczestnika</div>
+    <div class="add-row">
+      <div style="flex:2;min-width:100px"><div class="form-label">Imię / nick ✦</div><input class="form-input" id="p-name" placeholder="np. Karol" onkeydown="if(event.key==='Enter')addPlayer()"></div>
+      <div style="flex:1;min-width:80px"><div class="form-label">Poziom</div><select class="form-select" id="p-level"><option value="beginner">🐣 Nowicjusz</option><option value="intermediate" selected>🎮 Casual</option><option value="advanced">🔥 Zaawansowany</option><option value="expert">⚡ Ekspert</option></select></div>
+      <!-- [FIX-12] Swatche z tytułami -->
+      <div><div class="form-label">Kolor</div>
+        <div class="swatches" id="sw-av" style="gap:7px">
+          <div class="swatch sel" style="background:#1d4ed8" data-c="#1d4ed8" onclick="pickAv(this)" title="Niebieski"></div>
+          <div class="swatch" style="background:#7c3aed" data-c="#7c3aed" onclick="pickAv(this)" title="Fioletowy"></div>
+          <div class="swatch" style="background:#0e7490" data-c="#0e7490" onclick="pickAv(this)" title="Turkusowy"></div>
+          <div class="swatch" style="background:#15803d" data-c="#15803d" onclick="pickAv(this)" title="Zielony"></div>
+          <div class="swatch" style="background:#b45309" data-c="#b45309" onclick="pickAv(this)" title="Bursztynowy"></div>
+          <div class="swatch" style="background:#be123c" data-c="#be123c" onclick="pickAv(this)" title="Czerwony"></div>
+          <div class="swatch" style="background:#6d28d9" data-c="#6d28d9" onclick="pickAv(this)" title="Indygo"></div>
+          <div class="swatch" style="background:#166534" data-c="#166534" onclick="pickAv(this)" title="Ciemny zielony"></div>
+        </div>
+      </div>
+      <div style="padding-top:20px"><button class="btn btn-primary btn-sm" onclick="addPlayer()">+ Dodaj</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-eyebrow">Uczestnicy <span id="roster-count" style="color:var(--accent);font-family:'Fraunces',serif;font-size:14px;font-weight:700">0</span></div>
+    <div class="player-grid" id="player-grid"><p class="text-sm text-dim italic" style="grid-column:1/-1;padding:8px 0">Jeszcze nikogo nie dodano…</p></div>
+  </div>
+  <div class="panel-nav">
+    <button class="btn btn-ghost" onclick="goPanel(2,true)">← Wstecz</button>
+    <button class="btn btn-primary" onclick="launchTournament()">🚀 Uruchom turniej!</button>
+  </div>
+</div>
+
+<!-- PANEL 4 — Active tournament -->
+<div class="panel" id="p4">
+  <div class="hero" style="margin-bottom:20px">
+    <div class="hero-step"><div class="hero-step-line"></div>Turniej aktywny</div>
+    <h1 class="hero-title" id="t-hero-title">—</h1>
+    <p class="hero-sub" id="t-hero-sub">—</p>
+  </div>
+  <div class="big-stats" id="big-stats"></div>
+  <div class="pills" id="view-pills">
+    <button class="pill sel" onclick="switchView('matches',this)">⚔️ Mecze</button>
+    <button class="pill" onclick="switchView('standings',this)">🏆 Tabela</button>
+    <button class="pill" onclick="switchView('bracket',this)">🌳 Drabinka</button>
+    <button class="pill" onclick="switchView('stats',this)">📊 Stats</button>
+  </div>
+
+  <!-- MATCHES VIEW -->
+  <div id="v-matches">
+    <div class="t-layout">
+      <div id="matches-main"></div>
+      <div>
+        <div class="sidebar">
+          <div id="sidebar-live-add">
+            <div class="sidebar-title">➕ Dołącz w trakcie gry</div>
+            <div class="form-group"><input class="form-input" id="lv-name" placeholder="Imię nowego gracza" onkeydown="if(event.key==='Enter')addLivePlayer()"></div>
+            <div class="form-group"><select class="form-select" id="lv-level"><option value="beginner">🐣 Nowicjusz</option><option value="intermediate" selected>🎮 Casual</option><option value="advanced">🔥 Zaawansowany</option><option value="expert">⚡ Ekspert</option></select></div>
+            <!-- [FIX-12] Swatche z tytułami -->
+            <div class="swatches mb12" id="sw-live" style="gap:7px">
+              <div class="swatch sel" style="background:#1d4ed8" data-c="#1d4ed8" onclick="pickLv(this)" title="Niebieski"></div>
+              <div class="swatch" style="background:#7c3aed" data-c="#7c3aed" onclick="pickLv(this)" title="Fioletowy"></div>
+              <div class="swatch" style="background:#0e7490" data-c="#0e7490" onclick="pickLv(this)" title="Turkusowy"></div>
+              <div class="swatch" style="background:#15803d" data-c="#15803d" onclick="pickLv(this)" title="Zielony"></div>
+              <div class="swatch" style="background:#b45309" data-c="#b45309" onclick="pickLv(this)" title="Bursztynowy"></div>
+              <div class="swatch" style="background:#be123c" data-c="#be123c" onclick="pickLv(this)" title="Czerwony"></div>
+            </div>
+            <button class="btn btn-success btn-sm btn-w mb12" onclick="addLivePlayer()">+ Dołącz do turnieju</button>
+            <div class="divider"></div>
+          </div>
+          <div class="sidebar-title">⚡ Szybkie akcje</div>
+          <button class="btn btn-secondary btn-sm btn-w mb8" id="btn-next-rnd" style="display:none" onclick="generateNextRound()">⟳ Następna runda</button>
+          <button class="btn btn-secondary btn-sm btn-w mb8" id="btn-adv-br"   style="display:none" onclick="advanceBracket()">⟳ Zaawansuj drabinkę</button>
+          <button class="btn btn-danger btn-sm btn-w" onclick="resetTournament()">🗑 Reset turnieju</button>
+          <div class="divider"></div>
+          <button class="btn btn-primary btn-sm btn-w" onclick="finishTournament()" style="background:linear-gradient(135deg,#b45309,#f59e0b);box-shadow:0 4px 16px rgba(180,83,9,.35)">🏆 Zakończ turniej</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="v-standings" style="display:none"><div class="card" id="std-card"></div></div>
+  <div id="v-bracket"  style="display:none"><div class="card"><div class="card-eyebrow">Drabinka turniejowa</div><div class="br-scroll"><div class="bracket" id="br-inner"></div></div></div></div>
+  <div id="v-stats"    style="display:none"><div class="card" id="stats-card"></div></div>
+</div>
+
+</div><!-- /panels -->
+</div><!-- /root -->
+
+<!-- RESULT MODAL -->
+<div class="overlay" id="ov-result">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-ttl">Wpisz wynik</div><button class="modal-close" onclick="closeOverlay()">✕</button></div>
+    <div class="modal-body">
+      <div id="res-players" class="mb16"></div>
+      <div class="result-quick">
+        <button class="rq-btn" id="rq1" onclick="setQuickResult('p1')">🏆 Wygrał P1</button>
+        <button class="rq-btn" onclick="setQuickResult('draw')">🤝 Remis</button>
+        <button class="rq-btn" id="rq2" onclick="setQuickResult('p2')">🏆 Wygrał P2</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" id="rl1">Gracz 1</label><input class="score-inp" id="rs1" type="number" min="0" step="0.5"></div>
+        <div class="form-group"><label class="form-label" id="rl2">Gracz 2</label><input class="score-inp" id="rs2" type="number" min="0" step="0.5"></div>
+      </div>
+      <div class="form-group mt8"><label class="form-label">Notatka (opcja)</label><input class="form-input" id="r-note" placeholder='np. "Mat w 32 ruchach" ✨'></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeOverlay()">Anuluj</button>
+      <button class="btn btn-primary" onclick="saveResult()">Zapisz wynik ✓</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script src="shared.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
